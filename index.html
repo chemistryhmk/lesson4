@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Перевірочна робота з хімії: Будова атома та Періодичність</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@500;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Interactive Orbital Box Styling */
+        .orbital-box {
+            width: 48px;
+            height: 48px;
+            border: 2px solid #334155;
+            background: #1e293b;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+        .orbital-box:hover {
+            border-color: #38bdf8;
+            background: #0f172a;
+        }
+        .orbital-box.filled-1 {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #38bdf8;
+        }
+        .orbital-box.filled-2 {
+            background: #4f46e5;
+            color: #a5f3fc;
+            border-color: #818cf8;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        /* Print formatting */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #screen-certificate {
+                display: block !important;
+            }
+            #certificate-card {
+                box-shadow: none !important;
+                border: 4px solid #1e1b4b !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-900">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 no-print">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-cyan-600 flex items-center justify-center text-white font-bold shadow-md">
+                    <i class="fa-solid fa-file-pen text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base md:text-lg text-slate-100 leading-tight">Перевірочна робота з хімії</h1>
+                    <p class="text-xs text-cyan-400 font-medium">Будова атома • Електронні конфігурації • Ступені окиснення</p>
+                </div>
+            </div>
+
+            <div id="user-status-bar" class="hidden items-center gap-3">
+                <div class="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-user-graduate text-cyan-400"></i>
+                    <span id="nav-user-name" class="font-semibold text-slate-200"></span>
+                    <span id="nav-user-group" class="bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded text-[10px] font-mono border border-cyan-800"></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- SCREEN 1: Registration Screen -->
+        <section id="screen-auth" class="max-w-md mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-cyan-950 text-cyan-400 rounded-2xl border border-cyan-800 flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white">Авторизація учня</h2>
+                <p class="text-xs text-slate-400 mt-1">Вкажіть прізвище, ім'я та клас / групу для початку виконання варіанта</p>
+            </div>
+
+            <form onsubmit="initApp(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Прізвище та Ім'я *</label>
+                    <input type="text" id="input-name" required placeholder="наприклад, Коваленко Олексій" 
+                        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Клас / Група *</label>
+                    <input type="text" id="input-group" required placeholder="наприклад, 11-А" 
+                        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all text-sm">
+                </div>
+
+                <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700/60 space-y-2 text-xs text-slate-300">
+                    <div class="font-semibold text-cyan-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check"></i> Структура перевірочної роботи (7 завдань):
+                    </div>
+                    <ul class="space-y-1 list-disc list-inside text-slate-400">
+                        <li>Обчислення p<sup>+</sup>, n<sup>0</sup>, e<sup>-</sup> для ізотопу Скандію (<sup>45</sup><sub>21</sub>Sc).</li>
+                        <li><b>Електронна формула елемента ГОЛОВНОЇ підгрупи (Фосфор, P).</b></li>
+                        <li><b>Електронна формула елемента ПОБІЧНОЇ підгрупи (Нікель, Ni).</b></li>
+                        <li>Графічна електронна формула атома Хрому (Cr) з урахуванням «провалу електрона».</li>
+                        <li>Збуджений стан атома Арсену (As*) та його вища валентність.</li>
+                        <li>Впорядкування елементів 4-го періоду за зростанням електронегативності.</li>
+                        <li>Визначення ступенів окиснення у K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>, H<sub>3</sub>PO<sub>4</sub>, Fe<sub>2</sub>O<sub>3</sub>.</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm">
+                    Розпочати виконання <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </section>
+
+        <!-- SCREEN 2: Interactive Test Workspace -->
+        <section id="screen-workspace" class="hidden space-y-6">
+
+            <!-- Task Navigation Bar -->
+            <div class="bg-slate-900 border border-slate-800 p-3 rounded-2xl flex flex-wrap gap-2 justify-between items-center">
+                <div class="flex gap-2 overflow-x-auto py-1 max-w-full" id="task-stepper">
+                    <!-- Dynamic task buttons -->
+                </div>
+                <div class="text-xs font-semibold text-slate-400">
+                    Завдання: <span id="step-counter-text" class="text-cyan-400 font-bold">1 / 5</span>
+                </div>
+            </div>
+
+            <!-- Task Card Container -->
+            <div id="task-card-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl">
+                <!-- Dynamic Task Content -->
+            </div>
+
+            <!-- Action Navigation Buttons -->
+            <div class="flex justify-between items-center pt-2">
+                <button id="btn-prev-task" onclick="navigateTask(-1)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-5 rounded-xl border border-slate-700 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-chevron-left"></i> Попереднє
+                </button>
+                
+                <button id="btn-next-task" onclick="navigateTask(1)" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2.5 px-6 rounded-xl text-xs flex items-center gap-2 shadow-md">
+                    Наступне <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+                <button id="btn-finish-test" onclick="openFinishModal()" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-6 rounded-xl text-xs flex items-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-check-double"></i> Завершити роботу
+                </button>
+            </div>
+
+        </section>
+
+        <!-- SCREEN 3: Final Certificate & Detailed Results Screen -->
+        <section id="screen-certificate" class="hidden">
+            <div id="certificate-card" class="bg-white text-slate-900 rounded-3xl p-8 md:p-12 border-8 border-indigo-950 shadow-2xl relative max-w-3xl mx-auto">
+                <div class="text-center space-y-2">
+                    <div class="inline-flex p-3 bg-indigo-50 rounded-2xl text-indigo-900 mb-1">
+                        <i class="fa-solid fa-award text-4xl"></i>
+                    </div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-indigo-700">Результати перевірочної роботи</p>
+                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight font-serif text-slate-900">СЕРТИФІКАТ</h1>
+                    <p class="text-xs text-slate-500">з теми: «Будова атома. Електронні конфігурації. Ступені окиснення»</p>
+                </div>
+
+                <div class="my-6 text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Видано учню / учениці:</p>
+                    <h2 id="cert-name" class="text-2xl md:text-3xl font-extrabold text-indigo-950 border-b-2 border-indigo-200 inline-block px-8 py-1"></h2>
+                    <p class="text-sm text-slate-600 mt-2">Клас / Група: <span id="cert-group" class="font-bold text-slate-900"></span></p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-center my-6">
+                    <p class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Підсумкова оцінка</p>
+                    <div class="flex justify-center items-baseline gap-2 my-2">
+                        <span id="cert-score-num" class="text-5xl font-black text-indigo-950">0</span>
+                        <span class="text-lg font-bold text-indigo-700">/ 12 балів</span>
+                    </div>
+                    <p id="cert-percentage" class="text-xs text-slate-600 font-medium"></p>
+                    <div id="cert-badge" class="inline-block mt-3 px-4 py-1 rounded-full text-xs font-bold"></div>
+                </div>
+
+                <div class="space-y-2 my-6 text-xs">
+                    <h4 class="font-bold text-slate-700 uppercase tracking-wider text-[11px] mb-2">Деталізація успішності за модулями:</h4>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <span class="font-medium text-slate-700">1. Будова ядра ізотопу <sup>45</sup><sub>21</sub>Sc</span>
+                        <span id="mod-score-1" class="font-mono font-bold text-slate-900"></span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <span class="font-medium text-slate-700">2. Електронна формула (Головна підгрупа: P)</span>
+                        <span id="mod-score-2" class="font-mono font-bold text-slate-900"></span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <span class="font-medium text-slate-700">3. Електронна формула (Побічна підгрупа: Ni)</span>
+                        <span id="mod-score-3" class="font-mono font-bold text-slate-900"></span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <span class="font-medium text-slate-700">4. Провал електрона Хрому (Cr)</span>
+                        <span id="mod-score-4" class="font-mono font-bold text-slate-900"></span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <span class="font-medium text-slate-700">5. Збуджений стан атома Арсену (As*)</span>
+                        <span id="mod-score-5" class="font-mono font-bold text-slate-900"></span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <span class="font-medium text-slate-700">6. Ряд електронегативності (Ga, Ge, As)</span>
+                        <span id="mod-score-6" class="font-mono font-bold text-slate-900"></span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <span class="font-medium text-slate-700">7. Ступені окиснення (K<sub>2</sub>Cr<sub>2</sub>O<sub>7</sub>, H<sub>3</sub>PO<sub>4</sub>, Fe<sub>2</sub>O<sub>3</sub>)</span>
+                        <span id="mod-score-7" class="font-mono font-bold text-slate-900"></span>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 gap-4">
+                    <div>
+                        <p>Дата виконання: <span id="cert-date-val" class="font-semibold text-slate-800"></span></p>
+                        <p>Ідентифікатор: <span id="cert-uuid-val" class="font-mono text-slate-700"></span></p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <div class="font-bold text-slate-800">Модуль автоматизованого контролю</div>
+                        <div class="text-slate-400">Перевірочна робота з хімії</div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-center gap-4 no-print">
+                    <button onclick="window.print()" class="bg-indigo-900 hover:bg-indigo-950 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center gap-2 text-sm">
+                        <i class="fa-solid fa-print"></i> Роздрукувати / Зберегти PDF
+                    </button>
+                    <button onclick="resetApp()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 px-6 rounded-xl transition-all text-sm">
+                        <i class="fa-solid fa-rotate-right"></i> На головну
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal confirm completion (Replaces browser confirm alert) -->
+    <div id="modal-confirm-finish" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 bg-amber-950 text-amber-400 rounded-2xl flex items-center justify-center mx-auto text-xl border border-amber-800/50">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white">Завершити роботу?</h3>
+            <p class="text-xs text-slate-400">Ви дійсно бажаєте завершити перевірочну роботу та сформувати підсумковий сертифікат?</p>
+            <div class="flex gap-3 justify-center pt-2">
+                <button onclick="closeFinishModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl text-xs">
+                    Повернутися
+                </button>
+                <button onclick="evaluateTest()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-lg">
+                    Завершити і перевірити
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500 no-print">
+        Перевірочна робота з хімії • Контроль знань з теми «Будова атома»
+    </footer>
+
+    <script>
+        let userProfile = { name: '', group: '' };
+        let currentTaskIndex = 0;
+
+        // Student User Answers State (Initial values are empty/unanswered '?')
+        let userAnswers = {
+            task1: { p: '?', n: '?', e: '?' },
+            taskMainFormula: '',
+            taskSideFormula: '',
+            task2: { '4s': [0], '3d': [0, 0, 0, 0, 0] },
+            task3: { unpaired: '?', valency: '?' },
+            task4: ['Ge', 'As', 'Ga'], // initial array position to be ordered by student
+            task5: { Cr: '?', P: '?', Fe: '?' }
+        };
+
+        const taskDefinitions = [
+            {
+                id: 1,
+                title: "Завдання 1. Складові частини ядра та атома Скандію",
+                category: "Будова атома",
+                description: "Обчисліть кількість протонів (p+), нейтронів (n0) та електронів (e-) для нейтрального атома Скандію-45 (<sup>45</sup><sub>21</sub>Sc)."
+            },
+            {
+                id: 2,
+                title: "Завдання 2. Електронна формула елемента ГОЛОВНОЇ підгрупи (P, Z=15)",
+                category: "Електронні конфігурації",
+                description: "Складіть повну електронну формулу для атома Фосфору (P, Z=15). Скористайтеся екранними кнопками або вводьте текст з клавіатури (наприклад: 1s² 2s² 2p⁶ 3s² 3p³)."
+            },
+            {
+                id: 3,
+                title: "Завдання 3. Електронна формула елемента ПОБІЧНОЇ підгрупи (Ni, Z=28)",
+                category: "Електронні конфігурації",
+                description: "Складіть повну електронну формулу для атома Нікелю (Ni, Z=28) у основному стані. Скористайтеся клавішами підказки для швидкого введення орбіталей та показників степенів."
+            },
+            {
+                id: 4,
+                title: "Завдання 4. Графічна електронна формула Хрому (Cr)",
+                category: "Електронні конфігурації",
+                description: "Заповніть валентні орбіталі 4s та 3d атома Хрому (Cr, Z=24) у основному стані з урахуванням явища «провалу електрона».<br><span class='text-cyan-400 text-xs'>Клік по комірці: 1 клік = ↑ (1 електрон), 2 кліки = ↑↓ (пара), 3 кліки = порожньо.</span>"
+            },
+            {
+                id: 5,
+                title: "Завдання 5. Збуджений стан атома Арсену (As*)",
+                category: "Валентні стани",
+                description: "Для атома Арсену (As, Z=33) вкажіть кількість непарних електронів у збудженому стані (As*) та відповідну вищу валентність."
+            },
+            {
+                id: 6,
+                title: "Завдання 6. Зміна електронегативності у періоді",
+                category: "Періодичний закон",
+                description: "Розташуйте елементи 4-го періоду: Германій (Ge), Арсен (As), Галій (Ga) у порядку <b>ЗРОСТАННЯ</b> їхньої електронегативності (від найменшої до найбільшої)."
+            },
+            {
+                id: 7,
+                title: "Завдання 7. Визначення ступенів окиснення у сполуках",
+                category: "Ступінь окиснення",
+                description: "Установіть ступені окиснення вказаних елементів у наданих хімічних формулах речовин."
+            }
+        ];
+
+        function initApp(e) {
+            e.preventDefault();
+            const name = document.getElementById('input-name').value.trim();
+            const group = document.getElementById('input-group').value.trim();
+
+            if (!name || !group) return;
+
+            userProfile.name = name;
+            userProfile.group = group;
+
+            document.getElementById('nav-user-name').textContent = name;
+            document.getElementById('nav-user-group').textContent = group;
+            document.getElementById('user-status-bar').classList.remove('hidden');
+            document.getElementById('user-status-bar').classList.add('flex');
+
+            document.getElementById('screen-auth').classList.add('hidden');
+            document.getElementById('screen-workspace').classList.remove('hidden');
+
+            renderStepper();
+            loadTask(0);
+        }
+
+        function renderStepper() {
+            const stepper = document.getElementById('task-stepper');
+            stepper.innerHTML = '';
+            taskDefinitions.forEach((t, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => loadTask(idx);
+                const isCurrent = idx === currentTaskIndex;
+                
+                btn.className = `px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    isCurrent 
+                        ? 'bg-cyan-600 text-white shadow-md' 
+                        : 'bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-600'
+                }`;
+                btn.innerHTML = `Завдання ${idx + 1}`;
+                stepper.appendChild(btn);
+            });
+
+            document.getElementById('step-counter-text').textContent = `${currentTaskIndex + 1} / ${taskDefinitions.length}`;
+            
+            // Toggle navigation button states
+            document.getElementById('btn-prev-task').style.visibility = currentTaskIndex === 0 ? 'hidden' : 'visible';
+            if (currentTaskIndex === taskDefinitions.length - 1) {
+                document.getElementById('btn-next-task').classList.add('hidden');
+                document.getElementById('btn-finish-test').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-next-task').classList.remove('hidden');
+                document.getElementById('btn-finish-test').classList.add('hidden');
+            }
+        }
+
+        function navigateTask(direction) {
+            const newIndex = currentTaskIndex + direction;
+            if (newIndex >= 0 && newIndex < taskDefinitions.length) {
+                loadTask(newIndex);
+            }
+        }
+
+        function loadTask(index) {
+            currentTaskIndex = index;
+            renderStepper();
+            const container = document.getElementById('task-card-container');
+            const task = taskDefinitions[index];
+
+            let contentHTML = `
+                <div class="mb-6 border-b border-slate-800 pb-4">
+                    <span class="inline-block px-3 py-1 bg-cyan-950 text-cyan-400 border border-cyan-800 rounded-lg text-xs font-bold uppercase tracking-wider mb-2">
+                        ${task.category}
+                    </span>
+                    <h3 class="text-xl font-extrabold text-white">${task.title}</h3>
+                    <p class="text-xs md:text-sm text-slate-300 mt-2 leading-relaxed">${task.description}</p>
+                </div>
+            `;
+
+            if (task.id === 1) {
+                contentHTML += renderTask1();
+            } else if (task.id === 2) {
+                contentHTML += renderFormulaTask('taskMainFormula', 'Фосфор (P, Z=15)', '1s² 2s² 2p⁶ 3s² 3p³');
+            } else if (task.id === 3) {
+                contentHTML += renderFormulaTask('taskSideFormula', 'Нікель (Ni, Z=28)', '1s² 2s² 2p⁶ 3s² 3p⁶ 4s² 3d⁸');
+            } else if (task.id === 4) {
+                contentHTML += renderTask2();
+            } else if (task.id === 5) {
+                contentHTML += renderTask3();
+            } else if (task.id === 6) {
+                contentHTML += renderTask4();
+            } else if (task.id === 7) {
+                contentHTML += renderTask5();
+            }
+
+            container.innerHTML = contentHTML;
+            if (task.id === 6) {
+                renderSorterUI();
+            }
+        }
+
+        // ==========================================
+        // ELECTRONIC FORMULA TASKS (MAIN & SIDE)
+        // ==========================================
+        function renderFormulaTask(stateKey, elementName, examplePlaceholder) {
+            const currentVal = userAnswers[stateKey] || '';
+            
+            return `
+                <div class="space-y-6 bg-slate-950/60 p-6 rounded-2xl border border-slate-800">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+                            Електронна формула ${elementName}:
+                        </label>
+                        <input type="text" id="input-${stateKey}" value="${currentVal}" 
+                            oninput="userAnswers['${stateKey}'] = this.value"
+                            placeholder="наприклад: ${examplePlaceholder}"
+                            class="w-full bg-slate-900 border border-slate-700 text-cyan-300 font-mono font-bold text-lg rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-500 shadow-inner">
+                    </div>
+
+                    <!-- On-screen Chemical Keyboard Helper -->
+                    <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                            <span><i class="fa-solid fa-keyboard text-cyan-400 mr-1"></i> Інтерактивна хімічна клавіатура (натискайте для швидкого вводу):</span>
+                        </div>
+                        
+                        <!-- Subshell Buttons -->
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="text-xs text-slate-400 py-1 mr-1">Підрівні:</span>
+                            ${['1s', '2s', '2p', '3s', '3p', '4s', '3d', '4p'].map(sub => `
+                                <button type="button" onclick="appendFormulaToken('${stateKey}', '${sub}')" 
+                                    class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-cyan-300 font-mono font-bold rounded-lg border border-slate-700 text-xs shadow-sm">
+                                    ${sub}
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <!-- Superscript Buttons -->
+                        <div class="flex flex-wrap gap-1.5 pt-1">
+                            <span class="text-xs text-slate-400 py-1 mr-1">Електрони:</span>
+                            ${['¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹', '¹⁰'].map(sup => `
+                                <button type="button" onclick="appendFormulaToken('${stateKey}', '${sup}')" 
+                                    class="px-2.5 py-1 bg-indigo-950 hover:bg-indigo-900 text-indigo-300 font-mono font-bold rounded-lg border border-indigo-800 text-xs shadow-sm">
+                                    ${sup}
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <!-- Utility Buttons -->
+                        <div class="flex gap-2 pt-2 border-t border-slate-800">
+                            <button type="button" onclick="appendFormulaToken('${stateKey}', ' ')" 
+                                class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs rounded-lg border border-slate-700">
+                                Пробіл
+                            </button>
+                            <button type="button" onclick="backspaceFormulaToken('${stateKey}')" 
+                                class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-mono text-xs rounded-lg border border-slate-700">
+                                <i class="fa-solid fa-backspace"></i> Видалити
+                            </button>
+                            <button type="button" onclick="clearFormulaToken('${stateKey}')" 
+                                class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-rose-400 font-mono text-xs rounded-lg border border-slate-700 ml-auto">
+                                Очистити
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function appendFormulaToken(stateKey, token) {
+            userAnswers[stateKey] = (userAnswers[stateKey] || '') + token;
+            const input = document.getElementById(`input-${stateKey}`);
+            if (input) input.value = userAnswers[stateKey];
+        }
+
+        function backspaceFormulaToken(stateKey) {
+            userAnswers[stateKey] = (userAnswers[stateKey] || '').slice(0, -1);
+            const input = document.getElementById(`input-${stateKey}`);
+            if (input) input.value = userAnswers[stateKey];
+        }
+
+        function clearFormulaToken(stateKey) {
+            userAnswers[stateKey] = '';
+            const input = document.getElementById(`input-${stateKey}`);
+            if (input) input.value = '';
+        }
+
+        function normalizeFormula(str) {
+            if (!str) return '';
+            return str
+                .toLowerCase()
+                .replace(/\s+/g, '')
+                .replace(/\^/g, '')
+                .replace(/¹0|¹⁰/g, '10').replace(/¹/g, '1').replace(/²/g, '2').replace(/³/g, '3')
+                .replace(/⁴/g, '4').replace(/⁵/g, '5').replace(/⁶/g, '6').replace(/⁷/g, '7')
+                .replace(/⁸/g, '8').replace(/⁹/g, '9');
+        }
+
+        // ==========================================
+        // TASK 1: NUCLEUS & ATOM SCANDIUM 45Sc
+        // ==========================================
+        function renderTask1() {
+            const p = userAnswers.task1.p;
+            const n = userAnswers.task1.n;
+            const e = userAnswers.task1.e;
+
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center bg-slate-950/60 p-6 rounded-2xl border border-slate-800">
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-900 rounded-2xl border border-slate-800 text-center">
+                        <span class="text-xs text-slate-400 font-mono mb-2">Символ ізотопу у завданні:</span>
+                        <div class="text-4xl font-black text-white font-mono tracking-widest my-2">
+                            <sup class="text-xl text-indigo-400">45</sup>
+                            <span class="text-5xl text-cyan-400">Sc</span>
+                            <sub class="text-xl text-cyan-400">21</sub>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-2">Вкажіть кількість частинок для цього атома праворуч</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-200">Протони (p<sup>+</sup>):</span>
+                            <input type="number" min="0" max="100" value="${p === '?' ? '' : p}" placeholder="?" 
+                                oninput="updateTask1('p', this.value)"
+                                class="w-20 bg-slate-800 border border-slate-700 text-center text-cyan-300 font-mono font-bold text-base py-1.5 rounded-lg focus:outline-none focus:border-cyan-500">
+                        </div>
+
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-200">Нейтрони (n<sup>0</sup>):</span>
+                            <input type="number" min="0" max="100" value="${n === '?' ? '' : n}" placeholder="?" 
+                                oninput="updateTask1('n', this.value)"
+                                class="w-20 bg-slate-800 border border-slate-700 text-center text-cyan-300 font-mono font-bold text-base py-1.5 rounded-lg focus:outline-none focus:border-cyan-500">
+                        </div>
+
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-200">Електрони (e<sup>-</sup>):</span>
+                            <input type="number" min="0" max="100" value="${e === '?' ? '' : e}" placeholder="?" 
+                                oninput="updateTask1('e', this.value)"
+                                class="w-20 bg-slate-800 border border-slate-700 text-center text-cyan-300 font-mono font-bold text-base py-1.5 rounded-lg focus:outline-none focus:border-cyan-500">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateTask1(field, val) {
+            userAnswers.task1[field] = val === '' ? '?' : parseInt(val);
+        }
+
+        // ==========================================
+        // TASK 2: CHROMIUM ORBITAL BUILDER (Cr)
+        // ==========================================
+        function renderTask2() {
+            const sBox = userAnswers.task2['4s'][0];
+            const dBoxes = userAnswers.task2['3d'];
+
+            let dBoxesHTML = '';
+            dBoxes.forEach((val, idx) => {
+                let symbol = '';
+                let boxClass = 'orbital-box';
+                if (val === 1) { symbol = '↑'; boxClass += ' filled-1'; }
+                if (val === 2) { symbol = '↑↓'; boxClass += ' filled-2'; }
+
+                dBoxesHTML += `
+                    <div onclick="toggleOrbitalBox('3d', ${idx})" class="${boxClass}" id="box-3d-${idx}">
+                        ${symbol}
+                    </div>
+                `;
+            });
+
+            let sSymbol = '';
+            let sClass = 'orbital-box';
+            if (sBox === 1) { sSymbol = '↑'; sClass += ' filled-1'; }
+            if (sBox === 2) { sSymbol = '↑↓'; sClass += ' filled-2'; }
+
+            return `
+                <div class="space-y-6 bg-slate-950/60 p-6 rounded-2xl border border-slate-800">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center gap-4">
+                        <span class="w-12 font-mono text-cyan-400 font-bold text-lg text-center">4s</span>
+                        <div onclick="toggleOrbitalBox('4s', 0)" class="${sClass}" id="box-4s-0">
+                            ${sSymbol}
+                        </div>
+                        <span class="text-xs text-slate-400 ml-auto">Підрівень 4s (1 комірка)</span>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-wrap items-center gap-4">
+                        <span class="w-12 font-mono text-cyan-400 font-bold text-lg text-center">3d</span>
+                        <div class="flex gap-2">
+                            ${dBoxesHTML}
+                        </div>
+                        <span class="text-xs text-slate-400 ml-auto">Підрівень 3d (5 комірок)</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleOrbitalBox(subshell, idx) {
+            let current = userAnswers.task2[subshell][idx];
+            current = (current + 1) % 3;
+            userAnswers.task2[subshell][idx] = current;
+
+            loadTask(currentTaskIndex); // Reload current task UI safely
+        }
+
+        // ==========================================
+        // TASK 3: ARSENIC EXCITED STATE (As*)
+        // ==========================================
+        function renderTask3() {
+            const unp = userAnswers.task3.unpaired;
+            const val = userAnswers.task3.valency;
+
+            return `
+                <div class="space-y-4 bg-slate-950/60 p-6 rounded-2xl border border-slate-800 max-w-xl mx-auto">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                        <label class="text-xs font-semibold text-slate-200">Кількість непарних електронів в As*:</label>
+                        <select onchange="userAnswers.task3.unpaired = this.value" class="bg-slate-800 text-cyan-300 font-mono font-bold text-sm rounded-lg border border-slate-700 px-4 py-2 focus:outline-none">
+                            <option value="?" ${unp === '?' ? 'selected' : ''}>?</option>
+                            <option value="1" ${unp === '1' ? 'selected' : ''}>1</option>
+                            <option value="3" ${unp === '3' ? 'selected' : ''}>3</option>
+                            <option value="5" ${unp === '5' ? 'selected' : ''}>5</option>
+                            <option value="7" ${unp === '7' ? 'selected' : ''}>7</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                        <label class="text-xs font-semibold text-slate-200">Вища валентність Арсену у збудженому стані:</label>
+                        <select onchange="userAnswers.task3.valency = this.value" class="bg-slate-800 text-cyan-300 font-mono font-bold text-sm rounded-lg border border-slate-700 px-4 py-2 focus:outline-none">
+                            <option value="?" ${val === '?' ? 'selected' : ''}>?</option>
+                            <option value="I" ${val === 'I' ? 'selected' : ''}>I</option>
+                            <option value="III" ${val === 'III' ? 'selected' : ''}>III</option>
+                            <option value="IV" ${val === 'IV' ? 'selected' : ''}>IV</option>
+                            <option value="V" ${val === 'V' ? 'selected' : ''}>V</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // TASK 4: ELECTRONEGATIVITY SORTER
+        // ==========================================
+        function renderTask4() {
+            return `
+                <div class="space-y-4 bg-slate-950/60 p-6 rounded-2xl border border-slate-800">
+                    <p class="text-xs text-slate-400 bg-slate-900 p-3 rounded-xl border border-slate-800">
+                        Використовуйте кнопки <i class="fa-solid fa-arrow-up text-cyan-400"></i> та <i class="fa-solid fa-arrow-down text-cyan-400"></i>, щоб розмістити елементи у порядку <b>ЗРОСТАННЯ</b> їхньої електронегативності (згори донизу).
+                    </p>
+
+                    <div id="sorter-list-container" class="space-y-3">
+                        <!-- Dynamic sorted elements -->
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSorterUI() {
+            const container = document.getElementById('sorter-list-container');
+            if (!container) return;
+
+            const elementNames = {
+                'Ga': 'Галій (Ga, Z=31)',
+                'Ge': 'Германій (Ge, Z=32)',
+                'As': 'Арсен (As, Z=33)'
+            };
+
+            let itemsHTML = '';
+            userAnswers.task4.forEach((code, idx) => {
+                itemsHTML += `
+                    <div class="flex items-center justify-between p-4 bg-slate-900 rounded-xl border border-slate-800 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-7 h-7 bg-cyan-950 text-cyan-400 font-mono font-bold rounded-lg flex items-center justify-center text-xs border border-cyan-800">${idx + 1}</span>
+                            <span class="font-bold text-slate-100 text-sm">${elementNames[code]}</span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="moveSorterItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-arrow-up text-xs"></i>
+                            </button>
+                            <button onclick="moveSorterItem(${idx}, 1)" ${idx === userAnswers.task4.length - 1 ? 'disabled' : ''} class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed">
+                                <i class="fa-solid fa-arrow-down text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = itemsHTML;
+        }
+
+        function moveSorterItem(index, dir) {
+            const newIndex = index + dir;
+            if (newIndex < 0 || newIndex >= userAnswers.task4.length) return;
+
+            const temp = userAnswers.task4[index];
+            userAnswers.task4[index] = userAnswers.task4[newIndex];
+            userAnswers.task4[newIndex] = temp;
+
+            renderSorterUI();
+        }
+
+        // ==========================================
+        // TASK 5: OXIDATION STATES
+        // ==========================================
+        function renderTask5() {
+            const cr = userAnswers.task5.Cr;
+            const p = userAnswers.task5.P;
+            const fe = userAnswers.task5.Fe;
+
+            return `
+                <div class="space-y-4 bg-slate-950/60 p-6 rounded-2xl border border-slate-800">
+                    
+                    <!-- K2Cr2O7 -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-mono text-slate-400 block">Дикалій дихромат</span>
+                            <span class="text-base font-bold text-white font-mono">K<sub>2</sub><span class="text-cyan-400">Cr</span><sub>2</sub>O<sub>7</sub></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400">Ступінь окиснення Cr:</span>
+                            <select onchange="userAnswers.task5.Cr = this.value" class="bg-slate-800 text-cyan-300 font-mono font-bold text-sm rounded-lg border border-slate-700 px-3 py-1.5 focus:outline-none">
+                                <option value="?" ${cr === '?' ? 'selected' : ''}>?</option>
+                                <option value="+2" ${cr === '+2' ? 'selected' : ''}>+2</option>
+                                <option value="+3" ${cr === '+3' ? 'selected' : ''}>+3</option>
+                                <option value="+4" ${cr === '+4' ? 'selected' : ''}>+4</option>
+                                <option value="+6" ${cr === '+6' ? 'selected' : ''}>+6</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- H3PO4 -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-mono text-slate-400 block">Ортофосфорна кислота</span>
+                            <span class="text-base font-bold text-white font-mono">H<sub>3</sub><span class="text-cyan-400">P</span>O<sub>4</sub></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400">Ступінь окиснення P:</span>
+                            <select onchange="userAnswers.task5.P = this.value" class="bg-slate-800 text-cyan-300 font-mono font-bold text-sm rounded-lg border border-slate-700 px-3 py-1.5 focus:outline-none">
+                                <option value="?" ${p === '?' ? 'selected' : ''}>?</option>
+                                <option value="-3" ${p === '-3' ? 'selected' : ''}>-3</option>
+                                <option value="+1" ${p === '+1' ? 'selected' : ''}>+1</option>
+                                <option value="+3" ${p === '+3' ? 'selected' : ''}>+3</option>
+                                <option value="+5" ${p === '+5' ? 'selected' : ''}>+5</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Fe2O3 -->
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-mono text-slate-400 block">Ферум(III) оксид</span>
+                            <span class="text-base font-bold text-white font-mono"><span class="text-cyan-400">Fe</span><sub>2</sub>O<sub>3</sub></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-400">Ступінь окиснення Fe:</span>
+                            <select onchange="userAnswers.task5.Fe = this.value" class="bg-slate-800 text-cyan-300 font-mono font-bold text-sm rounded-lg border border-slate-700 px-3 py-1.5 focus:outline-none">
+                                <option value="?" ${fe === '?' ? 'selected' : ''}>?</option>
+                                <option value="+2" ${fe === '+2' ? 'selected' : ''}>+2</option>
+                                <option value="+3" ${fe === '+3' ? 'selected' : ''}>+3</option>
+                                <option value="+6" ${fe === '+6' ? 'selected' : ''}>+6</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+        }
+
+        function openFinishModal() {
+            document.getElementById('modal-confirm-finish').classList.remove('hidden');
+        }
+
+        function closeFinishModal() {
+            document.getElementById('modal-confirm-finish').classList.add('hidden');
+        }
+
+        function evaluateTest() {
+            closeFinishModal();
+
+            let taskScores = [0, 0, 0, 0, 0, 0, 0]; // 7 tasks, sum up to 12.0 max
+
+            // Task 1: Sc nucleus (p=21, n=24, e=21) -> 1.5 pts
+            if (userAnswers.task1.p === 21 && userAnswers.task1.n === 24 && userAnswers.task1.e === 21) {
+                taskScores[0] = 1.5;
+            }
+
+            // Task 2: Main Subgroup (P, Z=15) -> 1s2 2s2 2p6 3s2 3p3 -> 2.0 pts
+            const normP = normalizeFormula(userAnswers.taskMainFormula);
+            if (normP === '1s22s22p63s23p3') {
+                taskScores[1] = 2.0;
+            }
+
+            // Task 3: Side Subgroup (Ni, Z=28) -> 1s2 2s2 2p6 3s2 3p6 4s2 3d8 (or 3d8 4s2) -> 2.0 pts
+            const normNi = normalizeFormula(userAnswers.taskSideFormula);
+            if (normNi === '1s22s22p63s23p64s23d8' || normNi === '1s22s22p63s23p63d84s2') {
+                taskScores[2] = 2.0;
+            }
+
+            // Task 4: Chromium electron jump (4s^1 3d^5) -> 2.0 pts
+            const sIsOne = userAnswers.task2['4s'][0] === 1;
+            const dAreAllOne = userAnswers.task2['3d'].every(v => v === 1);
+            if (sIsOne && dAreAllOne) {
+                taskScores[3] = 2.0;
+            }
+
+            // Task 5: Arsenic excited state (unpaired=5, valency=V) -> 1.5 pts
+            if (userAnswers.task3.unpaired === '5' && userAnswers.task3.valency === 'V') {
+                taskScores[4] = 1.5;
+            }
+
+            // Task 6: Electronegativity order Ga < Ge < As -> 1.5 pts
+            const targetOrder = ['Ga', 'Ge', 'As'];
+            if (JSON.stringify(userAnswers.task4) === JSON.stringify(targetOrder)) {
+                taskScores[5] = 1.5;
+            }
+
+            // Task 7: Oxidation states (Cr=+6, P=+5, Fe=+3) -> 1.5 pts
+            if (userAnswers.task5.Cr === '+6' && userAnswers.task5.P === '+5' && userAnswers.task5.Fe === '+3') {
+                taskScores[6] = 1.5;
+            }
+
+            const totalScore = Math.round(taskScores.reduce((a, b) => a + b, 0) * 10) / 10;
+            const percentage = Math.round((totalScore / 12) * 100);
+
+            // Populate Certificate UI
+            document.getElementById('cert-name').textContent = userProfile.name;
+            document.getElementById('cert-group').textContent = userProfile.group;
+            document.getElementById('cert-score-num').textContent = totalScore;
+            document.getElementById('cert-percentage').textContent = `Загальний відсоток правильних відповідей: ${percentage}%`;
+
+            // Topic scores text
+            document.getElementById('mod-score-1').textContent = `${taskScores[0]} / 1.5 балів`;
+            document.getElementById('mod-score-2').textContent = `${taskScores[1]} / 2.0 балів`;
+            document.getElementById('mod-score-3').textContent = `${taskScores[2]} / 2.0 балів`;
+            document.getElementById('mod-score-4').textContent = `${taskScores[3]} / 2.0 балів`;
+            document.getElementById('mod-score-5').textContent = `${taskScores[4]} / 1.5 балів`;
+            document.getElementById('mod-score-6').textContent = `${taskScores[5]} / 1.5 балів`;
+            document.getElementById('mod-score-7').textContent = `${taskScores[6]} / 1.5 балів`;
+
+            const badge = document.getElementById('cert-badge');
+            if (totalScore >= 10) {
+                badge.textContent = "Високий рівень знань";
+                badge.className = "inline-block mt-3 px-4 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
+            } else if (totalScore >= 7) {
+                badge.textContent = "Достатній рівень знань";
+                badge.className = "inline-block mt-3 px-4 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800";
+            } else if (totalScore >= 4) {
+                badge.textContent = "Середній рівень знань";
+                badge.className = "inline-block mt-3 px-4 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800";
+            } else {
+                badge.textContent = "Початковий рівень знань";
+                badge.className = "inline-block mt-3 px-4 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800";
+            }
+
+            const now = new Date();
+            document.getElementById('cert-date-val').textContent = now.toLocaleDateString('uk-UA');
+            document.getElementById('cert-uuid-val').textContent = `CHEM-TEST-${now.getFullYear()}-${Math.floor(10000 + Math.random()*90000)}`;
+
+            // Confetti effect
+            try {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } catch(e){}
+
+            // Switch Screen
+            document.getElementById('screen-workspace').classList.add('hidden');
+            document.getElementById('screen-certificate').classList.remove('hidden');
+        }
+
+        function resetApp() {
+            userAnswers = {
+                task1: { p: '?', n: '?', e: '?' },
+                taskMainFormula: '',
+                taskSideFormula: '',
+                task2: { '4s': [0], '3d': [0, 0, 0, 0, 0] },
+                task3: { unpaired: '?', valency: '?' },
+                task4: ['Ge', 'As', 'Ga'],
+                task5: { Cr: '?', P: '?', Fe: '?' }
+            };
+            currentTaskIndex = 0;
+            document.getElementById('screen-certificate').classList.add('hidden');
+            document.getElementById('screen-auth').classList.remove('hidden');
+            document.getElementById('user-status-bar').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
